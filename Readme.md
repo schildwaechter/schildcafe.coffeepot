@@ -10,3 +10,10 @@ The following prompt was given:
 > Implement a REST API for a coffee machine as outlined in the Design.md.
 > The application should be packaged with a Dockerfile to run as a container in a Kubernetes cluster.
 > Provide OpenAPI specs.
+
+## Solutions
+
+* [Antigravity](https://github.com/schildwaechter/schildcafe.coffeepot/tree/antigravity)
+* [Codex](https://github.com/schildwaechter/schildcafe.coffeepot/tree/codex)
+* [Cursor](https://github.com/schildwaechter/schildcafe.coffeepot/tree/cursor)
+
