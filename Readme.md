@@ -1,6 +1,6 @@
 # SchildCafe Coffee Machine
 
-This repository contains different branches where AI coding tools have been prompted to impement the Coffee Machine as described in the [Design.md](Design.md).
+This is the implementation by Cursor with auto model.
 
 ## Prompt
 

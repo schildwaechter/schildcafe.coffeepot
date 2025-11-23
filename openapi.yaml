@@ -1,0 +1,260 @@
+openapi: 3.0.3
+info:
+  title: Coffee Machine API
+  description: REST API for a coffee machine that produces different hot drinks
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://coffeepot.example.com
+    description: Production server
+
+paths:
+  /start-job:
+    post:
+      summary: Start a new coffee job
+      description: |
+        Starts a new coffee brewing job. The machine takes between 20 and 55 seconds for each product.
+        Returns 503 if the machine is not available to accept a new job.
+        Returns 400 if the product is unsupported or the request is invalid.
+      tags:
+        - jobs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartJobRequest"
+            example:
+              product: COFFEE
+      responses:
+        "200":
+          description: Job started successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+              example:
+                jobId: "550e8400-e29b-41d4-a716-446655440000"
+                product: COFFEE
+                jobStarted: "2024-01-15T10:30:00Z"
+                jobReady: "2024-01-15T10:30:35Z"
+        "400":
+          description: Bad request - unsupported product or invalid request
+          content:
+            text/plain:
+              example: "unsupported product: INVALID_PRODUCT"
+        "503":
+          description: Service unavailable - machine is busy
+          content:
+            text/plain:
+              example: "machine is not available"
+
+  /retrieve-job:
+    get:
+      summary: Retrieve a completed job
+      description: |
+        Retrieves a ready coffee job by ID.
+        - Returns 503 if the job is not ready yet
+        - Returns 404 if the job is not found
+        - Returns 410 if the job has already been retrieved
+      tags:
+        - jobs
+      parameters:
+        - name: jobID
+          in: query
+          required: true
+          description: The job ID to retrieve
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        "200":
+          description: Job retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+              example:
+                jobId: "550e8400-e29b-41d4-a716-446655440000"
+                product: COFFEE
+                jobStarted: "2024-01-15T10:30:00Z"
+                jobReady: "2024-01-15T10:30:35Z"
+                jobRetrieved: "2024-01-15T10:31:00Z"
+        "404":
+          description: Job not found
+          content:
+            text/plain:
+              example: "job not found"
+        "410":
+          description: Job already retrieved
+          content:
+            text/plain:
+              example: "job already retrieved"
+        "503":
+          description: Service unavailable - job not ready yet
+          content:
+            text/plain:
+              example: "job not ready yet"
+
+  /healthz:
+    get:
+      summary: Health check endpoint
+      description: Returns 200 if the service is healthy
+      tags:
+        - health
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            text/plain:
+              example: "OK"
+
+  /readyz:
+    get:
+      summary: Readiness check endpoint
+      description: |
+        Returns 200 if the machine is ready to accept orders, 503 otherwise.
+        This endpoint is useful for Kubernetes readiness probes.
+      tags:
+        - health
+      responses:
+        "200":
+          description: Machine is ready to accept orders
+          content:
+            text/plain:
+              example: "Ready"
+        "503":
+          description: Machine is not ready
+          content:
+            text/plain:
+              example: "Not ready"
+
+  /status:
+    get:
+      summary: Machine status endpoint
+      description: |
+        Returns 200 when able to accept jobs, 503 when busy.
+        This is similar to /readyz but follows the design specification.
+      tags:
+        - status
+      responses:
+        "200":
+          description: Machine is available
+          content:
+            text/plain:
+              example: "Available"
+        "503":
+          description: Machine is busy
+          content:
+            text/plain:
+              example: "Busy"
+
+  /metrics:
+    get:
+      summary: Prometheus metrics endpoint
+      description: |
+        Returns Prometheus metrics including coffee_machine_status gauge.
+        - 0 = Available (ready to receive a new job)
+        - 1 = Brewing (currently brewing a job)
+        - 2 = Blocked (ready job that has not been retrieved)
+      tags:
+        - metrics
+      responses:
+        "200":
+          description: Prometheus metrics
+          content:
+            text/plain; version=0.0.4:
+              example: |
+                # HELP coffee_machine_status Current state of the coffee machine (0=available, 1=brewing, 2=blocked)
+                # TYPE coffee_machine_status gauge
+                coffee_machine_status 0
+
+  /history:
+    get:
+      summary: Get job history
+      description: Returns the entire list of all jobs that have been processed
+      tags:
+        - jobs
+      responses:
+        "200":
+          description: List of all jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+              example:
+                - jobId: "550e8400-e29b-41d4-a716-446655440000"
+                  product: COFFEE
+                  jobStarted: "2024-01-15T10:30:00Z"
+                  jobReady: "2024-01-15T10:30:35Z"
+                  jobRetrieved: "2024-01-15T10:31:00Z"
+                - jobId: "660e8400-e29b-41d4-a716-446655440001"
+                  product: ESPRESSO
+                  jobStarted: "2024-01-15T10:32:00Z"
+                  jobReady: "2024-01-15T10:32:25Z"
+
+components:
+  schemas:
+    Product:
+      type: string
+      enum:
+        - COFFEE
+        - STRONG_COFFEE
+        - CAPPUCCINO
+        - COFFEE_WITH_MILK
+        - ESPRESSO
+        - ESPRESSO_CHOCOLATE
+        - KAKAO
+        - HOT_WATER
+      description: Supported coffee machine products
+
+    StartJobRequest:
+      type: object
+      required:
+        - product
+      properties:
+        jobId:
+          type: string
+          format: uuid
+          description: Optional job ID. If not provided, a UUID will be generated.
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        product:
+          $ref: "#/components/schemas/Product"
+      example:
+        product: COFFEE
+
+    Job:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+          description: Unique job identifier
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        product:
+          $ref: "#/components/schemas/Product"
+        jobStarted:
+          type: string
+          format: date-time
+          description: Timestamp when the job was started
+          example: "2024-01-15T10:30:00Z"
+        jobReady:
+          type: string
+          format: date-time
+          description: Timestamp when the job will be ready
+          example: "2024-01-15T10:30:35Z"
+        jobRetrieved:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when the job was retrieved (null if not yet retrieved)
+          example: "2024-01-15T10:31:00Z"
+      required:
+        - jobId
+        - product
+        - jobStarted
+        - jobReady
