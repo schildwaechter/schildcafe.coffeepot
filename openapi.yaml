@@ -1,0 +1,133 @@
+openapi: 3.0.0
+info:
+  title: Coffee Machine API
+  description: API for a coffee machine to produce different hot drinks.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /start-job:
+    post:
+      summary: Start a new brewing job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product:
+                  type: string
+                  enum:
+                    - COFFEE
+                    - STRONG_COFFEE
+                    - CAPPUCCINO
+                    - COFFEE_WITH_MILK
+                    - ESPRESSO
+                    - ESPRESSO_CHOCOLATE
+                    - KAKAO
+                    - HOT_WATER
+                jobId:
+                  type: string
+                  format: uuid
+              required:
+                - product
+      responses:
+        '200':
+          description: Job started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '400':
+          description: Invalid request or unsupported product
+        '503':
+          description: Machine is busy
+  /retrieve-job:
+    get:
+      summary: Retrieve a finished job
+      parameters:
+        - in: query
+          name: jobID
+          schema:
+            type: string
+          required: true
+          description: The ID of the job to retrieve
+      responses:
+        '200':
+          description: Job retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '400':
+          description: Missing jobID
+        '404':
+          description: Job not found
+        '410':
+          description: Job already retrieved
+        '503':
+          description: Job not ready
+  /healthz:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+  /readyz:
+    get:
+      summary: Readiness check
+      responses:
+        '200':
+          description: Ready to accept jobs
+        '503':
+          description: Busy
+  /status:
+    get:
+      summary: Machine status
+      responses:
+        '200':
+          description: Available
+        '503':
+          description: Busy
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      responses:
+        '200':
+          description: Metrics
+          content:
+            text/plain:
+              schema:
+                type: string
+  /history:
+    get:
+      summary: Job history
+      responses:
+        '200':
+          description: List of all jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Job'
+components:
+  schemas:
+    Job:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        product:
+          type: string
+        jobStarted:
+          type: string
+          format: date-time
+        jobReady:
+          type: string
+          format: date-time
+        jobRetrieved:
+          type: string
+          format: date-time

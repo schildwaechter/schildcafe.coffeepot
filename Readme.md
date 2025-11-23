@@ -1,7 +1,6 @@
 # SchildCafe Coffee Machine
 
-This repository contains different branches where AI coding tools have been prompted to impement the Coffee Machine as described in the [Design.md](Design.md).
-
+This is the implementation by Antigravity with Gemini 3 Pro (High)
 ## Prompt
 
 The following prompt was given:
