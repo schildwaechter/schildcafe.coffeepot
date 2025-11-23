@@ -1,0 +1,11 @@
+# Binaries
+coffee-machine
+
+# Test binary and coverage
+*.test
+coverage.out
+
+# Build output
+bin/
+dist/
+.cache/
