@@ -1,6 +1,6 @@
 # SchildCafe Coffee Machine
 
-This repository contains different branches where AI coding tools have been prompted to impement the Coffee Machine as described in the [Design.md](Design.md).
+This is the implementation by Codex with GPT-5.1-Codex-Max.
 
 ## Prompt
 
@@ -10,6 +10,12 @@ The following prompt was given:
 > Implement a REST API for a coffee machine as outlined in the Design.md.
 > The application should be packaged with a Dockerfile to run as a container in a Kubernetes cluster.
 > Provide OpenAPI specs.
+
+## Issue
+
+The first iteration used `jobId` instead of the required `jobID`, this was fixed with the prompt
+
+> The design said to use URL parameter jobID but you expect jobId
 
 ## Running locally
 
