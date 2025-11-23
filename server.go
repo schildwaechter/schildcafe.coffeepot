@@ -102,9 +102,9 @@ func (s *server) handleStartJob(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) handleRetrieveJob(w http.ResponseWriter, r *http.Request) {
-	jobID := r.URL.Query().Get("jobId")
+	jobID := r.URL.Query().Get("jobID")
 	if jobID == "" {
-		http.Error(w, "missing jobId", http.StatusBadRequest)
+		http.Error(w, "missing jobID", http.StatusBadRequest)
 		return
 	}
 

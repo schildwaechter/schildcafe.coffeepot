@@ -20,7 +20,7 @@ PORT=8080 go run .
 ## API
 
 - Submit a job: `POST /start-job` with `{"product": "ESPRESSO"}` (optional `jobId`)
-- Retrieve a job: `GET /retrieve-job?jobId=<id>`
+- Retrieve a job: `GET /retrieve-job?jobID=<id>`
 - Health probes: `GET /healthz`, `GET /readyz`
 - Status: `GET /status`
 - Metrics: `GET /metrics` exposes `coffee_machine_status`
